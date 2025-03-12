@@ -21,4 +21,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "Restfull_API"
 include(":app")
- 

@@ -3,23 +3,21 @@ package com.example.restfull_api;
 import android.os.Bundle;
 import android.util.Log;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import java.util.ArrayList;
-import java.util.List;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-
-    public static final String URL = "http://10.0.2.2/aplikasi_mobile_1/"; // Perbaikan URL
-    private List<DataMahasiswa> results = new ArrayList<>();
-    private MahasiswaAdapter viewAdapter;
-    RecyclerView recyclerView;
+    private RecyclerView recyclerView;
+    private MahasiswaAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,39 +26,40 @@ public class MainActivity extends AppCompatActivity {
 
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-        viewAdapter = new MahasiswaAdapter(this, results);
-        recyclerView.setAdapter(viewAdapter);
 
-        loadDataMahasiswa();
-    }
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
 
-    private void loadDataMahasiswa() {
+        OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+        httpClient.addInterceptor(logging);
+
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(URL)
+                .baseUrl("http://10.0.2.2/API_mobile/")
                 .addConverterFactory(GsonConverterFactory.create())
+                .client(httpClient.build())
                 .build();
 
-        RegisterAPI api = retrofit.create(RegisterAPI.class);
-        Call<Value> call = api.view();
-        Log.i("Info Load", "Load Data Mahasiswa Diakses");
-
-        call.enqueue(new Callback<Value>() {
+        ApiService apiService = retrofit.create(ApiService.class);
+        Call<List<Mahasiswa>> call = apiService.getMahasiswa();
+        call.enqueue(new Callback<List<Mahasiswa>>() {
             @Override
-            public void onResponse(Call<Value> call, Response<Value> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    results.clear();
-                    results.addAll(response.body().getResult());
-                    viewAdapter.notifyDataSetChanged(); // Perbarui data tanpa membuat adapter baru
-                    Log.i("Info Load", "Data berhasil dimuat: " + results.size());
+            public void onResponse(Call<List<Mahasiswa>> call, Response<List<Mahasiswa>> response) {
+                if (response.isSuccessful()) {
+                    List<Mahasiswa> mahasiswaList = response.body();
+                    if (mahasiswaList != null && !mahasiswaList.isEmpty()) {
+                        adapter = new MahasiswaAdapter(mahasiswaList);
+                        recyclerView.setAdapter(adapter);
+                    } else {
+                        Log.d("MainActivity", "Daftar mahasiswa kosong");
+                    }
                 } else {
-                    Log.e("Info Load", "Respon tidak valid");
+                    Log.e("MainActivity", "Gagal mengambil data: " + response.message());
                 }
             }
 
             @Override
-            public void onFailure(Call<Value> call, Throwable t) {
-                Log.e("Info Load", "Gagal memuat data: " + t.getMessage());
+            public void onFailure(Call<List<Mahasiswa>> call, Throwable t) {
+                Log.e("MainActivity", "Error: " + t.getMessage());
             }
         });
     }
