@@ -6,11 +6,8 @@ import android.util.Patterns;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.google.gson.JsonObject;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -18,7 +15,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RegisterActivity extends AppCompatActivity {
-    private EditText etUsername, etPassword, etEmail;
+    private EditText etNama, etPassword, etEmail;
     private Button btnRegister;
 
     @Override
@@ -26,40 +23,37 @@ public class RegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        etUsername = findViewById(R.id.etRegUsername);
+        etNama = findViewById(R.id.etRegNama);
         etPassword = findViewById(R.id.etRegPassword);
         etEmail = findViewById(R.id.etRegEmail);
         btnRegister = findViewById(R.id.btnRegister);
 
         btnRegister.setOnClickListener(v -> {
-            String username = etUsername.getText().toString();
+            String nama = etNama.getText().toString();
             String password = etPassword.getText().toString();
             String email = etEmail.getText().toString();
 
-            // Validasi input kosong
-            if(username.isEmpty() || password.isEmpty() || email.isEmpty()) {
+            if (nama.isEmpty() || password.isEmpty() || email.isEmpty()) {
                 Toast.makeText(this, "Semua field harus diisi!", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            // Validasi format email
-            if(!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                 Toast.makeText(this, "Format email tidak valid", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            // Panggil API register
             Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl("http://10.0.2.2/API_mobile/")
+                    .baseUrl("http://10.0.2.2/aplikasi-mobile-2/API_mobile/")
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
 
             ApiService apiService = retrofit.create(ApiService.class);
-            Call<JsonObject> call = apiService.register(username, password, email);
+            Call<JsonObject> call = apiService.register(nama, password, email);
             call.enqueue(new Callback<JsonObject>() {
                 @Override
                 public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                    if(response.isSuccessful()) {
+                    if (response.isSuccessful()) {
                         Toast.makeText(RegisterActivity.this, "Registrasi berhasil!", Toast.LENGTH_SHORT).show();
                         startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
                         finish();

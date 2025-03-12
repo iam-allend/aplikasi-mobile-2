@@ -6,7 +6,7 @@
     android:padding="24dp">
 
     <TextView
-        android:id="@+id/tvUsername"
+        android:id="@+id/tvNama"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="20sp"
@@ -26,6 +26,4 @@
         android:text="Logout"
         android:backgroundTint="#FF0000"
         android:layout_marginTop="24dp"/>
-
-
 </LinearLayout>

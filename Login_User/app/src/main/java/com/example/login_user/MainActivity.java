@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 
-// Di MainActivity.java
 public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -14,10 +13,13 @@ public class MainActivity extends AppCompatActivity {
         // Cek status login
         SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
         boolean isLoggedIn = prefs.getBoolean("is_logged_in", false);
+        String email = prefs.getString("email", "");
 
-        if (isLoggedIn) {
+        if (isLoggedIn && !email.isEmpty()) {
             // Jika sudah login, arahkan ke HomeActivity
-            startActivity(new Intent(this, HomeActivity.class));
+            Intent intent = new Intent(this, HomeActivity.class);
+            intent.putExtra("email", email);
+            startActivity(intent);
         } else {
             // Jika belum login, arahkan ke LoginActivity
             startActivity(new Intent(this, LoginActivity.class));
